@@ -1,3 +1,22 @@
+"""
+This script is co-written by:
+
+Contributors:
+- Minqi Xiang (mx716@ic.ac.uk) Equally contributed
+- Zihan Zhu (zcabhub@ucl.ac.uk) Equally contributed
+
+Public Source: https://github.com/zhuzihan728/LLM_Adaptive_RAG
+Private Source: https://github.com/minqi1/S2RAG
+
+-----------------------------------------------------------------
+
+Code from Other Sources:
+- Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. Self-rag: Learning to retrieve, generate, and critique through self-reflection, 2023. pages 1, 3, 7,
+8, 11, 13, 16, 24, 25, 36
+  - Repository: https://github.com/AkariAsai/self-rag
+  - Description: data preprocessing and postprocessing functions
+"""
+
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -8,7 +27,6 @@ import numpy as np
 from tqdm import tqdm
 import json
 import argparse
-from tqdm import tqdm
 import string
 from utils import PROMPT_DICT, TASK_INST, load_jsonlines
 
@@ -34,7 +52,10 @@ def format_prompt_plain(prompt, evidences=None, instruction=None):
 
 def postprocess_ans(answer):
     """
-    Quote and modify from selfrag to ensure consistency
+    Code from Other Sources:
+    - Akari Asai
+    - Repository: https://github.com/AkariAsai/self-rag
+    - Description: data preprocessing and postprocessing functions    
     """
 
     if "</s>" in answer:
@@ -111,7 +132,10 @@ def process_data_evidences(demonstration, top_n):
 
 def preprocess_input_data(dataset, task=None, is_llama3=False):
     """
-    Quote and modify from selfrag to ensure consistency
+    Code from Other Sources:
+    - Akari Asai
+    - Repository: https://github.com/AkariAsai/self-rag
+    - Description: data preprocessing and postprocessing functions 
     """
     new_data = []
     
@@ -166,6 +190,12 @@ def main():
     parser.add_argument("--use_default_prompt", action="store_true", help="use default prompt as selfrag")
     
     args = parser.parse_args()
+    
+    if 'arc' in args.input_file.lower():
+        args.task = 'arc_c'
+    elif 'health' in args.input_file.lower():
+        args.task = 'fever'
+    
     model_name_ = args.model_name
     input_path = args.input_file
     if input_path.endswith(".json"):

@@ -1,3 +1,14 @@
+"""
+This script is co-written by:
+
+Contributors:
+- Minqi Xiang (mx716@ic.ac.uk) Equally contributed
+- Zihan Zhu (zcabhub@ucl.ac.uk) Equally contributed
+
+Public Source: https://github.com/zhuzihan728/LLM_Adaptive_RAG
+Private Source: https://github.com/minqi1/S2RAG
+"""
+
 from transformers import AutoModelForCausalLM, GenerationConfig, AutoTokenizer
 from transformers.generation.utils import GreedySearchDecoderOnlyOutput, BeamSampleDecoderOnlyOutput
 
@@ -20,10 +31,9 @@ class MyModel:
         print(f"# Configuring model Wrapper with max_new_tokens={max_new_tokens}")
         self.model = model
         self.tokenizer = tokenizer
-        if self.tokenizer.pad_token_id is None:
-            special_tokens_dict = {'pad_token': '[PAD]'}
-            self.tokenizer.add_special_tokens(special_tokens_dict)
-            self.model.resize_token_embeddings(len(self.tokenizer))
+        if self.tokenizer.pad_token_id is None: # set padding token to enable batch inference
+            self.tokenizer.pad_token = self.tokenizer.eos_token # set pad token to eos token since llama does not have padding token
+            self.model.config.pad_token_id = self.model.config.eos_token_id 
             print(f"# LM tokenizer does not contain padding token, set pad_token to {self.tokenizer.pad_token}: {self.tokenizer.pad_token_id}")
         self.pad_token = self.tokenizer.pad_token
         self.pad_token_id = self.tokenizer.pad_token_id
@@ -58,8 +68,7 @@ class MyModel:
         
         token_ids = tsfm_outputs.sequences[..., start_ind:] # token_ids starts from the query, and are padded to the same length
         texts = self.tokenizer.batch_decode(token_ids, skip_special_tokens=True)
-        # print(texts)
-        # print(token_ids.shape)
+
         token_ids = token_ids.tolist()
 
         log_probs = tsfm_outputs.scores # a tuple of size max output length, each element is a tensor of size batch_size(*beam size) x vocab_size [L, B*b, vocab]
@@ -83,7 +92,6 @@ class MyModel:
         preds = []
         assert len(token_ids) == len(texts) == len(log_probs_dict) == len(cumul_log_probs)
         assert len(token_ids[0]) == len(log_probs_dict[0])
-        # assert len(log_probs_dict[0][0]) == len(self.tokenizer)
         for i in zip (token_ids, texts, log_probs_dict, cumul_log_probs, id_log_probs):
             preds.append(OutputRequest(OutputRequest_unit(*i)))
         

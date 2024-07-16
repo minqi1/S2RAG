@@ -1,3 +1,22 @@
+"""
+This script is co-written by:
+
+Contributors:
+- Minqi Xiang (mx716@ic.ac.uk) Equally contributed
+- Zihan Zhu (zcabhub@ucl.ac.uk) Equally contributed
+
+Public Source: https://github.com/zhuzihan728/LLM_Adaptive_RAG
+Private Source: https://github.com/minqi1/S2RAG
+
+-----------------------------------------------------------------
+
+Code from Other Sources:
+- Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. Self-rag: Learning to retrieve, generate, and critique through self-reflection, 2023. pages 1, 3, 7,
+8, 11, 13, 16, 24, 25, 36
+  - Repository: https://github.com/AkariAsai/self-rag
+  - Description: normalize answer, f1 score, loose match functions
+"""
+
 import numpy as np
 import string
 import re
