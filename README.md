@@ -10,6 +10,7 @@ S2RAG is a framework designed to enhance retrieval-augmented generation (RAG) by
 ## Data
 - Provide two examples with the first 100 datapoints (PQA & ARC) for illustration.
 - The full-sized data used for Judge training is provided in `data_training/train_data_fusion_w_exp.jsonl` and `data_training/train_data_fusion.jsonl`.
+- The trained Judge is provided in `weights_minqi/llama3_8B_256/`
 
 ## Folder Structure
 ```
@@ -22,7 +23,7 @@ S2RAG/
 │   Data used to train Judge.
 │
 ├── minqi_inf_output/   
-│   Experiment raw results (only include examples here due to NDA in Tencent). 
+│   Experiment raw results (only include examples here due to NDA). 
 │
 ├── model/
 |   Huggingface models.
