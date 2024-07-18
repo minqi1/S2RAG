@@ -7,14 +7,6 @@ Contributors:
 
 Public Source: https://github.com/zhuzihan728/LLM_Adaptive_RAG
 Private Source: https://github.com/minqi1/S2RAG
-
------------------------------------------------------------------
-
-Code from Other Sources:
-- Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. Self-rag: Learning to retrieve, generate, and critique through self-reflection, 2023. pages 1, 3, 7,
-8, 11, 13, 16, 24, 25, 36
-  - Repository: https://github.com/AkariAsai/self-rag
-  - Description: data preprocessing function
 """
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -24,7 +16,7 @@ import torch
 import numpy as np
 import json
 import argparse
-from utils import PROMPT_DICT, TASK_INST, load_jsonlines
+from utils import PROMPT_DICT, TASK_INST, load_jsonlines, preprocess_input_data_origin, postprocess_ans 
 from datasets import Dataset
 import pandas as pd
 from torch.utils.data import DataLoader
@@ -36,51 +28,6 @@ random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
-
-
-def preprocess_input_data(dataset, task=None):
-    """
-    Code from Other Sources:
-    - Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. Self-rag: Learning to retrieve, generate, and critique through self-reflection, 2023. pages 1, 3, 7,
-    8, 11, 13, 16, 24, 25, 36
-    - Repository: https://github.com/AkariAsai/self-rag
-    - Description: data preprocessing function    
-    """
-    new_data = []
-    for item in dataset:
-        if task == "arc_c":
-            choices = item["choices"]
-            answer_labels = {}
-            for i in range(len(choices["label"])):
-                answer_key = choices["label"][i]
-                text = choices["text"][i]
-                if answer_key == "1":
-                    answer_labels["A"] = text
-                if answer_key == "2":
-                    answer_labels["B"] = text
-                if answer_key == "3":
-                    answer_labels["C"] = text
-                if answer_key == "4":
-                    answer_labels["D"] = text
-                if answer_key in ["A", "B", "C", "D"]:
-                    answer_labels[answer_key] = text
-
-            if "D" not in answer_labels:
-                answer_labels["D"] = ""
-            choices = "\nA: {0}\nB: {1}\nC: {2}\nD: {3}".format(
-                answer_labels["A"], answer_labels["B"], answer_labels["C"], answer_labels["D"])
-            if "E" in answer_labels:
-                choices += "\nE: {}".format(answer_labels["E"])
-            item["instruction"] = item["question"] + choices
-            item["answers"] = [item["answerKey"]]
-        elif task == "fever":
-            item["instruction"] = f"Is the claim \"{item['question']}\" true or false?"
-        else:
-            item["instruction"] = item["question"]
-        
-        new_data.append({'instruction': item["instruction"]})
-
-    return new_data
 
 def get_retrieval_p(pred, tokenizer):
     global YES_TOKEN, NO_TOKEN
@@ -142,7 +89,7 @@ def main():
     
     res={"retrieval_p":[], 'retrieval_p_hard':[], 'has_judgment':[], 'probs':[]}
     
-    input_data = preprocess_input_data(input_data, task=args.task)
+    input_data = preprocess_input_data_origin(input_data, task=args.task)
     
     
     dataset = Dataset.from_pandas(pd.DataFrame(input_data))

@@ -1,10 +1,3 @@
-"""
-Some functions cited from:
-- Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. Self-rag: Learning to retrieve, generate, and critique through self-reflection, 2023. pages 1, 3, 7,
-8, 11, 13, 16, 24, 25, 36
-  - Repository: https://github.com/AkariAsai/self-rag
-  - Description: data preprocessing function
-"""
 from metrics import *
 from typing import List
 import json
@@ -15,11 +8,9 @@ import torch
 from tqdm import tqdm
 import numpy as np
 import argparse
-from utils import TASK_INST
+from utils import TASK_INST, preprocess_input_data, load_jsonlines, compute_confidence, compute_inv_perplexity
 import jsonlines
 import copy
-
-from selfcheckgpt.modeling_selfcheck import SelfCheckBERTScore
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--choice", type=int, default=3, help="Choose the dataset to evaluate")
@@ -47,11 +38,6 @@ elif 'selfrag' in model_name:
 with open(file_path) as f:
     json_file = json.load(f)
 
-def load_jsonlines(file):
-    with jsonlines.open(file, 'r') as jsonl_f:
-        lst = [obj for obj in jsonl_f]
-    return lst
-
 response_prefix = ""
 answer_prefix = ""
 closed = False
@@ -68,73 +54,6 @@ if task == "health":
 cur_prefix = response_prefix + answer_prefix
 
 print(f"Current prefix: {cur_prefix}")
-
-def preprocess_input_data(dataset, task=None, is_llama3=False):
-    """
-    Code from Other Sources:
-    - Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. Self-rag: Learning to retrieve, generate, and critique through self-reflection, 2023. pages 1, 3, 7,
-    8, 11, 13, 16, 24, 25, 36
-    - Repository: https://github.com/AkariAsai/self-rag
-    - Description: data preprocessing function    
-    """
-    new_data = []
-    cur_task = task
-    if cur_task == "arc":
-        cur_task = "arc_c"
-    elif cur_task == "health":  
-        cur_task = "fever"
-
-    if cur_task in TASK_INST:
-        instruction = TASK_INST[cur_task]
-    else:
-        instruction = None
-    for item in dataset:
-        if cur_task == "arc_c":
-            choices = item["choices"]
-            answer_labels = {}
-            for i in range(len(choices["label"])):
-                answer_key = choices["label"][i]
-                text = choices["text"][i]
-                if answer_key == "1":
-                    answer_labels["A"] = text
-                if answer_key == "2":
-                    answer_labels["B"] = text
-                if answer_key == "3":
-                    answer_labels["C"] = text
-                if answer_key == "4":
-                    answer_labels["D"] = text
-                if answer_key in ["A", "B", "C", "D"]:
-                    answer_labels[answer_key] = text
-
-            if "D" not in answer_labels:
-                answer_labels["D"] = ""
-            choices = "\nA: {0}\nB: {1}\nC: {2}\nD: {3}".format(
-                answer_labels["A"], answer_labels["B"], answer_labels["C"], answer_labels["D"])
-            if "E" in answer_labels:
-                choices += "\nE: {}".format(answer_labels["E"])
-            item["instruction"] = item["question"] + choices
-            item["answers"] = [item["answerKey"]]
-        elif cur_task == "fever" and is_llama3:
-            item["instruction"] = f'Is the claim "{item["question"]}" true or false?'
-        else:
-            item["instruction"] = item["question"]
-        item["instruction"] = instruction + "\n\n" + item["instruction"] if instruction is not None else item["instruction"]
-        new_data.append(item)
-    return new_data
-
-
-def compute_confidence(log_probs:List):
-    '''
-    log_probs: List[float]
-    '''
-    return np.mean(np.exp(log_probs))
-
-def compute_inv_perplexity(log_probs:List):
-    '''
-    log_probs: List[float]
-    '''
-    return np.exp(np.mean(log_probs))
-
 
 def score_answer(context, a, question):
     start_str = "Given a question and a possible answers, you need to score it from 0-10 based on the context and answer quality. "
@@ -171,7 +90,7 @@ if closed:
     elif task == 'health':
         auxilliary_data_path = '/home/minqi/code/S2RAG/data_eval/health_claims_processed_example.jsonl'
     auxilliary_data = load_jsonlines(auxilliary_data_path)
-    auxilliary_data = preprocess_input_data(auxilliary_data, task=task, is_llama3=is_llama3)
+    auxilliary_data = preprocess_input_data(auxilliary_data, task=task, is_llama3=is_llama3, origin_task=False)
     assert len(json_file) == len(auxilliary_data), f'Length of json file {len(json_file)} and auxilliary data {len(auxilliary_data)} do not match!'
 
 def filter_score(l:str):

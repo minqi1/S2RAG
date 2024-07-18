@@ -7,14 +7,6 @@ Contributors:
 
 Public Source: https://github.com/zhuzihan728/LLM_Adaptive_RAG
 Private Source: https://github.com/minqi1/S2RAG
-
------------------------------------------------------------------
-
-Code from Other Sources:
-- Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, and Hannaneh Hajishirzi. Self-rag: Learning to retrieve, generate, and critique through self-reflection, 2023. pages 1, 3, 7,
-8, 11, 13, 16, 24, 25, 36
-  - Repository: https://github.com/AkariAsai/self-rag
-  - Description: data preprocessing and postprocessing functions
 """
 
 #!/usr/bin/python
@@ -28,7 +20,7 @@ from tqdm import tqdm
 import json
 import argparse
 import string
-from utils import PROMPT_DICT, TASK_INST, load_jsonlines
+from utils import PROMPT_DICT, TASK_INST, load_jsonlines, preprocess_input_data, postprocess_ans 
 
 seed = 123
 torch.backends.cudnn.deterministic = True
@@ -49,35 +41,6 @@ def format_prompt_plain(prompt, evidences=None, instruction=None):
     
     prompts = [[{"role": "user", "content": i}] for i in prompts]
     return prompts
-
-def postprocess_ans(answer):
-    """
-    Code from Other Sources:
-    - Akari Asai
-    - Repository: https://github.com/AkariAsai/self-rag
-    - Description: data preprocessing and postprocessing functions    
-    """
-
-    if "</s>" in answer:
-        answer = answer.replace("</s>", "")
-    if "\n" in answer:
-        answer = answer.replace("\n", "")
-
-    if "<|endoftext|>" in answer:
-        answer = answer.replace("<|endoftext|>", "")
-    if type(answer) is str and len(answer) > 0 and (answer[0] == "#" or answer[0] == ":"):
-        answer = answer[1:]
-        
-    def white_space_fix(text):
-        return ' '.join(text.split())
-
-    def handle_punc(text):
-        exclude = set(string.punctuation + "".join([u"‘", u"’", u"´", u"`"]))
-        return ''.join(ch if ch not in exclude else ' ' for ch in text)
-
-    def lower(text):
-        return text.lower()
-    return white_space_fix(handle_punc(lower(answer))).strip()
 
 
 def results_rec_func(preds, evidences):
@@ -129,54 +92,6 @@ def process_data_evidences(demonstration, top_n):
     prompt = PROMPT_DICT["prompt_no_input"].format_map(demonstration)
     evidences = demonstration[ctx_key][:top_n]
     return prompt, evidences
-
-def preprocess_input_data(dataset, task=None, is_llama3=False):
-    """
-    Code from Other Sources:
-    - Akari Asai
-    - Repository: https://github.com/AkariAsai/self-rag
-    - Description: data preprocessing and postprocessing functions 
-    """
-    new_data = []
-    
-    if task in TASK_INST:
-        instruction = TASK_INST[task]
-    else:
-        instruction = None
-    for item in dataset:
-        if task == "arc_c":
-            choices = item["choices"]
-            answer_labels = {}
-            for i in range(len(choices["label"])):
-                answer_key = choices["label"][i]
-                text = choices["text"][i]
-                if answer_key == "1":
-                    answer_labels["A"] = text
-                if answer_key == "2":
-                    answer_labels["B"] = text
-                if answer_key == "3":
-                    answer_labels["C"] = text
-                if answer_key == "4":
-                    answer_labels["D"] = text
-                if answer_key in ["A", "B", "C", "D"]:
-                    answer_labels[answer_key] = text
-
-            if "D" not in answer_labels:
-                answer_labels["D"] = ""
-            choices = "\nA: {0}\nB: {1}\nC: {2}\nD: {3}".format(
-                answer_labels["A"], answer_labels["B"], answer_labels["C"], answer_labels["D"])
-            if "E" in answer_labels:
-                choices += "\nE: {}".format(answer_labels["E"])
-            item["instruction"] = item["question"] + choices
-            item["answers"] = [item["answerKey"]]
-        elif task == "fever" and is_llama3:
-            item["instruction"] = f'Is the claim "{item["question"]}" true or false?'
-        else:
-            item["instruction"] = item["question"]
-        item["instruction"] = instruction + "\n\n" + item["instruction"] if instruction is not None else item["instruction"]
-        new_data.append(item)
-
-    return new_data
 
 def main():
     parser = argparse.ArgumentParser()
