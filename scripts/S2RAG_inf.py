@@ -26,10 +26,10 @@ parser.add_argument("--s_cfd", type=float, default=1.1, help="Cfd scale for rest
 parser.add_argument("--model_name", type=str, default="meta-llama/Meta-Llama-3-8B-Instruct", help="Model name") # judge model, normally the same as the base model, except for the last chapter: trained judge
 parser.add_argument("--tau", type=float, default=0.45, help="Cautiousness") #
 parser.add_argument("--use_trained", action="store_true", help="Use trained model")
-parser.add_argument("--trained_path", type=str, default="/home/minqi/code/S2RAG/model/generator_weights/llama3_8B_256", help="Trained model adapter path")
+parser.add_argument("--trained_path", type=str, default="weights_minqi/llama3_8B_256", help="Trained model adapter path")
 parser.add_argument("--test", action="store_true", help="run on test data")
 parser.add_argument("--bertmodel", type=str, default=None, help="BERT model path")
-parser.add_argument("--train_idx_path", type=str, default="/home/minqi/code/S2RAG/data_training/train_data_fusion.jsonl", help="Training data idx path")
+parser.add_argument("--train_idx_path", type=str, default="data_training/train_data_fusion.jsonl", help="Training data idx path")
 parser.add_argument("--base", type=str, default=None, help="Base dir") # base generator
 args = parser.parse_args()
 
