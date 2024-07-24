@@ -1,2 +1,4 @@
 data_training/ filter=lfs diff=lfs merge=lfs -text
 data_training/train_data_fusion_w_exp.jsonl filter=lfs diff=lfs merge=lfs -text
+weights_minqi/llama3_8B_256/adapter_model.bin filter=lfs diff=lfs merge=lfs -text
+data_training/train_data_fusion.jsonl filter=lfs diff=lfs merge=lfs -text
