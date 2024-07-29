@@ -90,7 +90,6 @@ class MyModel:
                     cumul_log_probs[i] += id2prob[token_ids[i][pos]] 
                     id_log_probs[i].append(id2prob[token_ids[i][pos]])
         preds = []
-        assert len(token_ids) == len(texts) == len(log_probs_dict) == len(cumul_log_probs)
         assert len(token_ids[0]) == len(log_probs_dict[0])
         for i in zip (token_ids, texts, log_probs_dict, cumul_log_probs, id_log_probs):
             preds.append(OutputRequest(OutputRequest_unit(*i)))

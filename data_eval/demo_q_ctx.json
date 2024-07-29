@@ -1,0 +1,10 @@
+{
+    "question": "Who is Minqi Xiang from Imperial College London?",
+    "ctxs": [
+        {"title": "Imperial", "text": "Imperial College London is a top university in the UK"},
+        {"title": "minqi", "text": "Minqi Xiang is a MSc student at Imperial College London"},
+        {"title": "minqi", "text": "Minqi Xiang is a professional dancer in China"},
+        {"title": "minchi", "text": "Minchi Zhang is a cook in France!"},
+        {"title": "min5", "text": "Min Xiang works as an engineer in Germany"}
+    ]
+}

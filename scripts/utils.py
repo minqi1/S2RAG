@@ -337,8 +337,10 @@ def cal_bertscore(preds, ref, bertscore_model, closed=False):
     return bert_score
 
 # choose better answers
-def choose_better_prompt(context, a, cfd_a, b, cfd_b, question, closed=False):
+def choose_better_prompt(context, a, cfd_a, b, cfd_b, question, closed=False, sys=None):
     start_str = "Given a question and two possible answers, you need to determine which answer is better, equally good or equally bad. "
+    if sys is not None:
+        start_str = sys + '\n' + start_str
     ctx_str = """Some context is provided, but please note that this context might be irrelevant or misleading (sourced from similar names): \n{context}""".format(context=context)
     
     ins_str = """
