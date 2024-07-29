@@ -160,6 +160,8 @@ def s2rag_gen(prompt, evidences, model, tokenizer, args, cur_question, response_
             best_ans = preds[score_record.index(max_score)].outputs[0].text
             print("====================================================Final Answer====================================================")
             print(best_ans)
+            print(f"Answer {score_record.index(max_score)}", best_ans)
+
             print("\n====================================================Answer Score====================================================")
             print(score_record)
             
@@ -188,7 +190,7 @@ def s2rag_gen(prompt, evidences, model, tokenizer, args, cur_question, response_
         best_pos = score_record_bert.index(max_score) # find the (first) best one including the bertscor
         best_ans = preds[best_pos].outputs[0].text
         print("====================================================Final Answer====================================================")
-        print(best_ans)
+        print(f"Answer {best_pos}", best_ans)
 
         print("====================================================Answer Score====================================================")
         print(score_record_bert)
@@ -271,7 +273,7 @@ def main():
         if args.demo_task == "fact":
             instruction = 'You are a helpful AI assistant. You are asked to provide a fact-based answer to the following question. Please provide a short answer based on the information in the passage.'
         elif args.demo_task == "fantasy":
-            instruction = 'You are asked to provide a fantasy-based answer to the following question. Please provide a very short and consice answer based on the information in the passage.'
+            instruction = 'You are asked to provide a fantasy-based answer to the following question. Please provide a very short and consice answer. And you should only answer this question if the provided background information is relevant to the question.'
         else:
             instruction = None
 
