@@ -372,6 +372,57 @@ def choose_better_prompt(context, a, cfd_a, b, cfd_b, question, closed=False, sy
     
     return start_str + '\n' + ctx_str + '\n' + ins_str
 
+def choose_better_prompt_fantasy(context, a, cfd_a, b, cfd_b, question, closed=False, sys=None):
+    start_str = "Given a question and two possible answers in a fantasy setting, you need to determine which answer is correct, equally good, or equally bad. "
+    if sys is not None:
+        start_str = sys + '\n' + start_str
+    ctx_str = """Some context is provided, but please note that this context might be irrelevant or misleading (sourced from similar names): \n{context}""".format(context=context)
+    
+    ins_str = """
+    
+    The good answer should be supported by the context, and the context should not be misleading.
+    - If the first answer is correct, type "1", with a short explanation.
+    - If the second answer is correct, type "2", with a short explanation.
+    - If both answers are both correct, type "3", with a short explanation.
+    - If two answers are incorrect and you need more retrieved passages to determine their correctness, type "4".
+    
+    Question: {question}
+
+    Answer 1: {a}
+    Answer 1 confidence score: {cfd_a:.3f}
+
+    Answer 2: {b}
+    Answer 2 confidence score: {cfd_b:.3f}
+    
+    Please read the provided context, question, and possible answers carefully before making a judgement.
+    - Ensure your decision is based on a thorough understanding of the context and question.
+
+    Examples:
+    Context: "In the Enchanted Library, the books whisper ancient knowledge."
+    Question: "What do the books do in the Enchanted Library?"
+    Answer: "The books whisper ancient knowledge."
+    Answer is correct - Supported by the context, which is not misleading.
+    
+    Context: "The Enchanted Cave is known for its sparkling crystals. Many adventurers visit the Enchanted Cave for its beauty."
+    Question: "What makes the Enchanted Forest special?"
+    Answer: "The Enchanted Forest is known for its sparkling crystals."
+    Answer is incorrect - Misled by similar context.
+    
+    Context: "The Whispering Valley is a tranquil place."
+    Question: "Who lives in the Whispering Valley?"
+    Answer: "The Whispering Valley is known for its crystal clear river."
+    Answer is incorrect - Context is irrelevant to the question.
+    
+    Context: "The capital of Eldoria is a bustling city known for its majestic castles and vibrant markets."
+    Question: "What is the name of the ruler of Eldoria?"
+    Answer: "I don't know."
+    Answer is incorrect - Does not address the question.
+
+    """.format(question=question, a=a, b=b, cfd_a=cfd_a, cfd_b=cfd_b)
+
+    return start_str + '\n' + ctx_str + '\n' + ins_str
+
+
 # choose better
 def train_instruction(ans_a, ans_b, question): # ans_a: (ctx, str, cfd)
     start_str = "Given a question and two possible answers, you need to determine which answer is better, equally good or equally bad. "

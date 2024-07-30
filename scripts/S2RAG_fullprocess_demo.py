@@ -22,7 +22,7 @@ import json
 import argparse
 import string
 from utils import PROMPT_DICT, TASK_INST, load_jsonlines, SelfCheckBERTScore, preprocess_input_data, postprocess_ans, \
-    compute_confidence, get_retrieval_p_compare, cal_bertscore, choose_better_prompt
+    compute_confidence, get_retrieval_p_compare, cal_bertscore, choose_better_prompt, choose_better_prompt_fantasy
 from peft import PeftModel, LoraConfig
 import warnings
 
@@ -64,18 +64,18 @@ def s2rag_gen(prompt, evidences, model, tokenizer, args, cur_question, response_
     preds = model.generate(prompt_no_ret + [prompt_use_one_ret[0]]) # a_0, a_1
     score_record = [0 for _ in range(len(prompt_use_one_ret)+ 1)]
     cur_pos = 0
+    ans1_cfd = compute_confidence(preds[cur_pos].outputs[0].id_log_probs)
     print(f"================================================Candidate Answers {0}================================================")
-    print(f'   Candidate answer: {cur_pos} \n   ' , preds[cur_pos].outputs[0].text.replace('assistant', '').strip())   
+    print(f'   Candidate answer: {cur_pos} | Confidence: {ans1_cfd:.2f} \n   ' , preds[cur_pos].outputs[0].text.replace('assistant', '').strip())   
     print(f'   Evidence: {None}')
 
     while True and cur_pos <= len(prompt_use_one_ret) - 1:
-        print(f"================================================Candidate Answers {cur_pos+1}================================================")
-        print(f'   Candidate answer: {cur_pos + 1} \n   ' , preds[cur_pos+1].outputs[0].text.replace('assistant', '').strip())   
-        print(f'   Evidence: {evidences[cur_pos]["text"]}')
-
         ans1_cfd = compute_confidence(preds[cur_pos].outputs[0].id_log_probs)
         ans2_cfd = compute_confidence(preds[cur_pos+1].outputs[0].id_log_probs)
-        
+
+        print(f"================================================Candidate Answers {cur_pos+1}================================================")
+        print(f'   Candidate answer: {cur_pos + 1} | Confidence: {ans2_cfd:.2f}  \n   ' , preds[cur_pos+1].outputs[0].text.replace('assistant', '').strip())   
+        print(f'   Evidence: {evidences[cur_pos]["title"]}' + ': ' + evidences[cur_pos]["text"].replace('\n', ' '))
         # 1. score from confidence: noticeable difference 1 score
         if cur_pos != 0: # fair comparison
             if ans1_cfd > args.s_cfd * ans2_cfd:
@@ -90,9 +90,9 @@ def s2rag_gen(prompt, evidences, model, tokenizer, args, cur_question, response_
 
         # 2. score from direct judgement (w/o ref) 1 score
         if cur_pos > 0:
-            cur_ctx = evidences[cur_pos-1]['text'] + '\n' + evidences[cur_pos]['text']
+            cur_ctx = evidences[cur_pos-1]['title'] + '\n'+ evidences[cur_pos-1]['text'] + '\n' + evidences[cur_pos]['title'] + '\n' + evidences[cur_pos]['text']
         else:
-            cur_ctx = evidences[cur_pos]['text'] # no retrieval does not have ctx
+            cur_ctx = evidences[cur_pos]['title'] + '\n' + evidences[cur_pos]['text']# no retrieval does not have ctx
         
         both_good = False
         retrieve_p = [0, 0, 0, 0]
@@ -101,9 +101,9 @@ def s2rag_gen(prompt, evidences, model, tokenizer, args, cur_question, response_
 
         sys = None
         if args.demo_task == 'fantasy':
-            sys = "You are an NPC in a fantasy game. You are provided with a pair of answers for a query. Your task is to select the most suitable answer that aligns with the current game context and is well-supported by the provided background information. Ensure your selection maintains the immersive and consistent nature of the game's fantasy setting."
-
-        prompt = choose_better_prompt(context=cur_ctx, a=a, cfd_a=ans1_cfd, b=b, cfd_b=ans2_cfd, question=cur_question, sys=sys)
+            prompt = choose_better_prompt_fantasy(context=cur_ctx, a=a, cfd_a=ans1_cfd, b=b, cfd_b=ans2_cfd, question=cur_question)
+        else:
+            prompt = choose_better_prompt(context=cur_ctx, a=a, cfd_a=ans1_cfd, b=b, cfd_b=ans2_cfd, question=cur_question)
         if 'Llama-3' in model_name or 'Llama-2' in model_name:
             if not args.use_trained:
                 chat = [{"role": "user", "content": prompt}]
@@ -184,6 +184,8 @@ def s2rag_gen(prompt, evidences, model, tokenizer, args, cur_question, response_
         # normalize the tmp_bertscore (norm to 1)
         tmp_bertscore = [it/(cur_pos + 3) for it in tmp_bertscore] # avg the bertscore
         score_record_bert = [score_record[ii] + tmp_bertscore[ii] for ii in range(len(prompt_use_one_ret) + 1)]
+        print("====================================================Voting Score====================================================")
+        print(tmp_bertscore)
 
         # output the best one
         max_score = max(score_record_bert)
@@ -271,9 +273,18 @@ def main():
             dataset = [dataset]
         new_data = []
         if args.demo_task == "fact":
-            instruction = 'You are a helpful AI assistant. You are asked to provide a fact-based answer to the following question. Please provide a short answer based on the information in the passage.'
+            instruction = "You are asked to provide a fact-based answer to the following question. Please provide a short answer (within 5 words), it is better to be supported by the context. If you do not know the answer, respond with: I do not know."
         elif args.demo_task == "fantasy":
-            instruction = 'You are asked to provide a fantasy-based answer to the following question. Please provide a very short and consice answer. And you should only answer this question if the provided background information is relevant to the question.'
+            instruction = """
+            You are asked to provide a fantasy-based answer to the following question. Please provide a very short and concise answer within 10 words. You should only give answers if it is supported by the provided context, otherwise, say you do not know unless it is a open question.
+
+            Example:
+            Question: What is the name of the legendary sword in the story?
+            Context: ["The legendary sword, Excalibur, is known for its magical properties.", "King Arthur wielded the sword Excalibur in many battles."]
+            Answer: Excalibur
+
+            If the context does not directly support the answer, respond with: "I do not know.".
+            """        
         else:
             instruction = None
 
@@ -285,9 +296,10 @@ def main():
     
     input_data = preprocess_input_data_demo(input_data)
    
-    for i, row in tqdm(enumerate(input_data)):
+    for i, row in enumerate(input_data):
         if i > 0:
             input("Press Enter to continue...")
+            print('\n\n')
         _, evidences = process_data_evidences(row, top_n=5)
         
         chats_no_ret = prompt_fn(prompt=row['instruction'], evidences=None)

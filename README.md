@@ -33,6 +33,8 @@ S2RAG/
 │   ├── run_cfd_se_EXAMPLE.sh
 │   ├── run_explanation_collection_EXAMPLE.sh
 │   ├── run_response_EXAMPLE.sh
+    ├── run_S2RAG_demo_2.sh
+    ├── run_S2RAG_demo.sh
 │   ├── run_S2RAG_EXAMPLE.sh
 │   ├── run_S2RAG_rm_cfd_EXAMPLE.sh
 │   ├── run_S2RAG_rm_SJ_EXAMPLE.sh
@@ -48,6 +50,7 @@ S2RAG/
 │   ├── response_collection.py
 │   ├── run_S2RAG_ablation_rm_cfd.py
 │   ├── run_S2RAG_ablation_rm_SJ.py
+│   ├── S2RAG_fullprocess_demo.py
 │   ├── S2RAG_inf.py
 │   ├── selfadpt_collection.py
 │   ├── stage3_no_offloading_accelerate.conf
@@ -128,6 +131,18 @@ S2RAG/
      ```bash
      bash run_bash/run_S2RAG_w_trained_judge_EXAMPLE.sh
      ```
+
+8. **Run S2RAG fullprocess demos (include generate response in realtime)**
+   - a. Fact-based questions:
+     ```bash
+     bash run_bash/run_S2RAG_demo.sh
+     ```
+
+    - b. Fantasy-based questions (i.e. gaming):
+      ```bash
+      bash run_bash/run_S2RAG_demo_2.sh
+      ```
+    
 
 ## Acknowledgements
 This project is a collaborative effort between the university and industry partners. Special thanks to all contributors and reviewers.
