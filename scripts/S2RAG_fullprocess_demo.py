@@ -1,14 +1,3 @@
-"""
-This script is co-written by:
-
-Contributors:
-- Minqi Xiang (mx716@ic.ac.uk) Equally contributed
-- Zihan Zhu (zcabhub@ucl.ac.uk) Equally contributed
-
-Public Source: https://github.com/zhuzihan728/LLM_Adaptive_RAG
-Private Source: https://github.com/minqi1/S2RAG
-"""
-
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 from transformers import AutoTokenizer, AutoModelForCausalLM
