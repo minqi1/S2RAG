@@ -135,12 +135,12 @@ S2RAG/
 8. **Run S2RAG fullprocess demos (include generate response in realtime)**
    - a. Fact-based questions:
      ```bash
-     bash run_bash/run_S2RAG_demo.sh
+     bash run_bash/run_S2RAG_demo_lla3.sh
      ```
 
     - b. Fantasy-based questions (i.e. gaming):
       ```bash
-      bash run_bash/run_S2RAG_demo_2.sh
+      bash run_bash/run_S2RAG_demo_lla3_2.sh
       ```
     
 

@@ -27,8 +27,8 @@ class OutputRequest_unit:
 
 class MyModel:
     def __init__(self, model, tokenizer, max_new_tokens=100):
-        print("#====================================================#")
-        print(f"# Configuring model Wrapper with max_new_tokens={max_new_tokens}")
+        # print("#====================================================#")
+        # print(f"# Configuring model Wrapper with max_new_tokens={max_new_tokens}")
         self.model = model
         self.tokenizer = tokenizer
         if self.tokenizer.pad_token_id is None: # set padding token to enable batch inference
@@ -47,8 +47,8 @@ class MyModel:
             terminators = [
                 tokenizer.eos_token_id
             ]
-        print(f"# Terminators: {' '.join([f'{i}: {tokenizer.decode(i)}' for i in terminators])}")
-        print("#====================================================#")
+        # print(f"# Terminators: {' '.join([f'{i}: {tokenizer.decode(i)}' for i in terminators])}")
+        # print("#====================================================#")
         # greedy decoding
         self.generation_config = GenerationConfig(
             max_new_tokens=max_new_tokens, renormalize_logits=True, return_dict_in_generate=True, output_scores=True, temperature=None, pad_token_id=self.pad_token_id, eos_token_id=terminators) 
