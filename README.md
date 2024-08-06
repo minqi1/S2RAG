@@ -54,7 +54,6 @@ S2RAG/
 │   ├── S2RAG_inf.py
 │   ├── selfadpt_collection.py
 │   ├── stage3_no_offloading_accelerate.conf
-│   ├── stage3_no_offloading_accelerate.conf:Zone.Identifier
 │   ├── tsfm_wrapper.py
 │   ├── utils.py
 │
@@ -145,4 +144,4 @@ S2RAG/
     
 
 ## Acknowledgements
-This project is a collaborative effort between the university and industry partners. Special thanks to all contributors and reviewers.
+This project is a collaborative effort between the university (Imperial College London) and industry partners (LightSpeed, Tencent).
