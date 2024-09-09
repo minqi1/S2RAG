@@ -78,6 +78,7 @@ S2RAG/
 **Data Processing and Analysis**
    - All related data processing and analysis are in `analysis_EXAMPLE.ipynb`. The following steps are executed sequentially, with occasional data processing steps performed in the notebook as needed. Please see the notebook for details.
 
+**Workflow Steps**
 1. **Collect Responses from Generator**
    - Run the following command:
      ```bash
