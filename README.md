@@ -116,7 +116,7 @@ S2RAG/
    - c. Remove self-voting:
      - Directly use the results from Step 5, see details in `analysis_EXAMPLE.ipynb`.
 
-7. **Training Judge**
+7. **Train Judge**
    - a. Judgement Explanations Collection:
      - See details in `analysis_EXAMPLE.ipynb`.
 
