@@ -142,6 +142,3 @@ S2RAG/
       bash run_bash/run_S2RAG_demo_lla3_2.sh
       ```
     
-
-## Acknowledgements
-This project is a collaborative effort between the university (Imperial College London) and industry partners (LightSpeed, Tencent).
