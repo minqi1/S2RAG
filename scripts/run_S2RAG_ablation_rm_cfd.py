@@ -17,9 +17,6 @@ import jsonlines
 import random 
 import copy
 
-# the one with bertscore as stage 3
-# cfd 1.1 arc best, 1 health best
-# note: this should be put under retrieval_lm to import the metrics.py and tsfm_wrapper.py
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_name", type=str, default="meta-llama/Meta-Llama-3-8B-Instruct", help="Model name") # judge model, normally the same as the base model, except for the last chapter: trained judge
 parser.add_argument("--choice", type=int, default=3, help="Choose the dataset to evaluate")

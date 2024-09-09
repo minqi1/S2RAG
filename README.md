@@ -75,34 +75,34 @@ S2RAG/
 ```
 
 ## Steps to Run
-1. **Data Processing and Analysis**
-   - All related scripts and notebooks are in `analysis_EXAMPLE.ipynb`.
+**Data Processing and Analysis**
+   - All related data processing and analysis are in `analysis_EXAMPLE.ipynb`. The following steps are executed sequentially, with occasional data processing steps performed in the notebook as needed. Please see the notebook for details.
 
-2. **Collect Responses from Generator**
+1. **Collect Responses from Generator**
    - Run the following command:
      ```bash
      bash run_bash/run_response_EXAMPLE.sh
      ```
 
-3. **Collect Adaptive Retrieval Data**
+2. **Collect Adaptive Retrieval Data**
    - Run the following command:
      ```bash
      bash run_bash/run_selfadpt_EXAMPLE.sh
      ```
 
-4. **Collect Confidence & Self-Evaluation Data**
+3. **Collect Confidence & Self-Evaluation Data**
    - Run the following command:
      ```bash
      bash run_bash/run_cfd_se_EXAMPLE.sh
      ```
 
-5. **Run S2RAG (Based on collected responses from Step 1 for efficiency)**
+4. **Run S2RAG (Based on collected responses from Step 1 for efficiency)**
    - Run the following command:
      ```bash
      bash run_bash/run_S2RAG_EXAMPLE.sh
      ```
 
-6. **Run Ablation Tests on S2RAG**
+5. **Run Ablation Tests on S2RAG**
    - a. Remove confidence evaluation:
      ```bash
      bash run_bash/run_S2RAG_rm_cfd_EXAMPLE.sh
@@ -116,7 +116,7 @@ S2RAG/
    - c. Remove self-voting:
      - Directly use the results from Step 5, see details in `analysis_EXAMPLE.ipynb`.
 
-7. **Train Judge**
+6. **Train Judge**
    - a. Judgement Explanations Collection:
      - See details in `analysis_EXAMPLE.ipynb`.
 
@@ -131,7 +131,7 @@ S2RAG/
      bash run_bash/run_S2RAG_w_trained_judge_EXAMPLE.sh
      ```
 
-8. **Run S2RAG fullprocess demos (include generate response in realtime)**
+7. **Run S2RAG fullprocess demos (include generate response in realtime)**
    - a. Fact-based questions:
      ```bash
      bash run_bash/run_S2RAG_demo_lla3.sh
@@ -140,5 +140,4 @@ S2RAG/
     - b. Fantasy-based questions (i.e. gaming):
       ```bash
       bash run_bash/run_S2RAG_demo_lla3_2.sh
-      ```
-    
+      ```   

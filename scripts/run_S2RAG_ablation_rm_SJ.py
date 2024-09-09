@@ -17,9 +17,6 @@ import jsonlines
 import random 
 import copy
 
-# the one with bertscore as stage 3
-# cfd 1.1 arc best, 1 health best
-# note: this should be put under retrieval_lm to import the metrics.py and tsfm_wrapper.py
 parser = argparse.ArgumentParser()
 parser.add_argument("--choice", type=int, default=3, help="Choose the dataset to evaluate")
 parser.add_argument("--cfd", type=float, default=0.95, help="Confidence threshold for no ret")

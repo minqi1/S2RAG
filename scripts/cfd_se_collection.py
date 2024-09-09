@@ -29,7 +29,7 @@ data_list = ['pqa', 'tqa', 'health', 'arc']
 task = data_list[choice]
 print(f"Current task: {task}...")
 if "Llama-3" in model_name:
-    file_path = f'/home/minqi/code/S2RAG/minqi_inf_output/llama3Ins-{task}.json'
+    file_path = f'/home/minqi/code/S2RAG/minqi_inf_output/llama3Ins-{task}.json' # change to real path
 elif 'Llama-2-7b' in model_name:
     file_path = f'/home/minqi/code/S2RAG/minqi_inf_output/llama2chat-{task}.json' 
 elif 'selfrag' in model_name:
